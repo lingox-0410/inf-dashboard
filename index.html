@@ -20,12 +20,9 @@
 </style>
 <script>
   (function() {
-    document.documentElement.classList.add('inf-locked');
     var PASS_HASH = 'ba943eaae9ee39abfc99ac7608944ada4b46f22a98f2b29eb1a31b218c893628';
-    if (sessionStorage.getItem('inf_dashboard_authed') === PASS_HASH) {
-      document.documentElement.classList.remove('inf-locked');
-      return;
-    }
+    if (sessionStorage.getItem('inf_dashboard_authed') === PASS_HASH) return;
+    document.documentElement.classList.add('inf-locked');
     async function sha256(s) {
       const buf = new TextEncoder().encode(s);
       const h = await crypto.subtle.digest('SHA-256', buf);
@@ -35,26 +32,31 @@
       var g = document.createElement('div');
       g.id = 'inf-gate';
       g.innerHTML = '<div class="box"><h1>🏋️ INF 经营看板</h1><div class="sub">请输入访问密码</div><input id="inf-pass" type="password" autocomplete="current-password" placeholder="密码"><button id="inf-go">进入</button><div class="err" id="inf-err"></div><div class="foot">仅授权访问 · 关闭浏览器后需重新输入</div></div>';
-      document.body.appendChild(g);
+      // 挂到 <html> 而不是 <body>，避免被 body 的 visibility:hidden 一起隐藏
+      document.documentElement.appendChild(g);
       var inp = document.getElementById('inf-pass'), btn = document.getElementById('inf-go'), err = document.getElementById('inf-err');
-      setTimeout(() => inp.focus(), 30);
+      setTimeout(function(){ inp.focus(); }, 30);
       async function check() {
         err.textContent = '';
-        var h = await sha256(inp.value);
-        if (h === PASS_HASH) {
-          sessionStorage.setItem('inf_dashboard_authed', PASS_HASH);
-          g.remove();
-          document.documentElement.classList.remove('inf-locked');
-        } else {
-          err.textContent = '密码错误';
-          inp.select();
+        try {
+          var h = await sha256(inp.value);
+          if (h === PASS_HASH) {
+            sessionStorage.setItem('inf_dashboard_authed', PASS_HASH);
+            g.remove();
+            document.documentElement.classList.remove('inf-locked');
+          } else {
+            err.textContent = '密码错误';
+            inp.select();
+          }
+        } catch (ex) {
+          err.textContent = '校验失败: ' + ex.message;
         }
       }
       btn.addEventListener('click', check);
-      inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+      inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') check(); });
     }
-    if (document.body) mount();
-    else document.addEventListener('DOMContentLoaded', mount);
+    // <html> 在 head 解析时已存在，可立即挂载，不等 DOMContentLoaded
+    mount();
   })();
 </script>
 <!-- ====== END 密码门 ====== -->
