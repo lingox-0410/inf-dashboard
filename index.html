@@ -374,11 +374,11 @@ input, select {
 <div class="tabbar">
   <div class="tab active" data-tab="L0"><span class="tab-num">L0</span>🔥 当月作战</div>
   <div class="tab" data-tab="L1"><span class="tab-num">L1</span>📊 终极指标</div>
-  <div class="tab" data-tab="L2"><span class="tab-num">L2</span>🔬 维度拆解</div>
-  <div class="tab" data-tab="L3"><span class="tab-num">L3</span>🧮 公式拆解</div>
-  <div class="tab" data-tab="L4"><span class="tab-num">L4</span>🏷 会员标签</div>
-  <div class="tab" data-tab="L5"><span class="tab-num">L5</span>📋 全员明细</div>
-  <div class="tab" data-tab="L6"><span class="tab-num">L6</span>🎟️ 体验课转化</div>
+  <div class="tab" data-tab="L6"><span class="tab-num">L2</span>🎟️ 体验课转化</div>
+  <div class="tab" data-tab="L2"><span class="tab-num">L3</span>🔬 维度拆解</div>
+  <div class="tab" data-tab="L3"><span class="tab-num">L4</span>🧮 公式拆解</div>
+  <div class="tab" data-tab="L4"><span class="tab-num">L5</span>🏷 会员标签</div>
+  <div class="tab" data-tab="L5"><span class="tab-num">L6</span>📋 全员明细</div>
 </div>
 
 <!-- ===== TAB L0: 当月作战面板 ===== -->
@@ -1061,8 +1061,20 @@ input, select {
 
 </div>
 
-<!-- ===== TAB L6: 体验课转化分析 ===== -->
+<!-- ===== TAB L2 (旧L6): 体验课转化分析 — 已前移至 Tab 2 位置 ===== -->
 <div class="tab-content" id="tab-L6">
+
+  <!-- 数据源说明 -->
+  <div style="background:rgba(88,166,255,0.08); border:1px solid var(--accent); border-radius:6px; padding:10px 14px; margin-bottom:14px; font-size:12px; line-height:1.7;">
+    <strong style="color:var(--accent);">📂 数据源 · 每日更新：</strong>
+    从飞书多维表格【记录明细】下载 →
+    <a href="https://rbr1yz9vfu.feishu.cn/base/QeezbeA0zaQ8EksPRGYcYJWxnLh?table=tblFKVf3pHXaleBK&view=vewvTbIxry"
+       target="_blank" rel="noopener"
+       style="color:var(--accent); text-decoration:underline;">
+      点此打开飞书表
+    </a>
+    <span style="color:var(--sub); margin-left:6px;">（base: QeezbeA0zaQ8EksPRGYcYJWxnLh · table: tblFKVf3pHXaleBK）</span>
+  </div>
 
   <!-- 业务问题+Todo -->
   <div class="section" style="background:linear-gradient(135deg, rgba(210,153,34,0.06), rgba(248,81,73,0.06)); border-color:var(--yellow); margin-bottom:14px;">
@@ -1366,6 +1378,12 @@ const ops = may['运营分析汇总'] || {};
 const rev = may['营收'] || {};
 // 营收用实际值，不再做线性外推
 
+// 当月未上课（有剩余课时）= 从「会员待跟进」过滤：总剩余>0 且 5月课时===0
+const _skipMap0 = DATA['不跟进名单'] || {};
+const _allFollowup = may['会员待跟进'] || [];
+const _zeroMonth = _allFollowup.filter(m => (m['总剩余']||0)>0 && (m['5月课时']||0)===0 && !(m['会员'] in _skipMap0));
+const _urgentRenew = _allFollowup.filter(m => m['紧急续课'] && !(m['会员'] in _skipMap0));
+
 const kpis = [
   {
     label: '5月已上课时',
@@ -1387,27 +1405,97 @@ const kpis = [
   },
   {
     label: '🔥 紧急续课',
-    value: ops['🔥紧急续课_≤5节']||0,
+    value: _urgentRenew.length,
     sub: `剩余≤5节 · 在练${ops['在练会员_总剩余>0']||0}人`,
     cls: 'urgent',
-    delta: `+ 💰需续课 ${ops['💰需续课_5至20节']||0} 人`
+    delta: `+ 💰需续课 ${ops['💰需续课_5至20节']||0} 人`,
+    clickable: 'urgent',
+    hint: '👇 点击查看明细'
   },
   {
-    label: '本月缺口',
-    value: (summary['目标课时']||0) - (summary['已上课时']||0) - (summary['已预约课时']||0),
-    sub: `节(月底前) · 需新会员 ${summary['需要新会员']||0} 个`,
-    cls: 'warn'
+    label: '⏰ 当月未上课 (有剩余)',
+    value: _zeroMonth.length,
+    sub: `5月课时=0 · 总剩余>0 · 已过滤不跟进 ${Object.keys(_skipMap0).length} 人`,
+    cls: 'warn',
+    delta: `占在练 ${(_zeroMonth.length/(ops['在练会员_总剩余>0']||1)*100).toFixed(1)}%`,
+    clickable: 'zeroMonth',
+    hint: '👇 点击查看明细'
   }
 ];
 document.getElementById('l0-kpi-row').innerHTML = kpis.map(k => `
-  <div class="kpi ${k.cls||''}">
+  <div class="kpi ${k.cls||''}" ${k.clickable?`data-kpi-click="${k.clickable}" style="cursor:pointer; transition:all 0.15s;"`:''}>
     <div class="label">${k.label}</div>
     <div class="value">${k.value}</div>
     <div class="sub">${k.sub||''}</div>
     ${k.delta ? `<div class="delta ${k.deltaCls||''}">${k.delta}</div>` : ''}
     ${k.progress!=null ? `<div class="kpi-progress"><div class="kpi-progress-fill" style="width:${k.progress*100}%;background:${k.progressBg};"></div></div>` : ''}
+    ${k.hint ? `<div style="margin-top:6px; font-size:10px; color:var(--accent); font-weight:600;">${k.hint}</div>` : ''}
   </div>
 `).join('');
+
+// KPI 点击悬停反馈 + 点击事件
+document.querySelectorAll('#l0-kpi-row [data-kpi-click]').forEach(el => {
+  el.addEventListener('mouseenter', () => { el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 4px 16px rgba(88,166,255,0.25)'; });
+  el.addEventListener('mouseleave', () => { el.style.transform = ''; el.style.boxShadow = ''; });
+  el.addEventListener('click', () => {
+    const kind = el.getAttribute('data-kpi-click');
+    if (kind === 'urgent') showKpiFollowup('urgent');
+    else if (kind === 'zeroMonth') showKpiFollowup('zeroMonth');
+  });
+});
+
+// KPI 下钻：紧急续课 / 当月未上课（有剩余）
+function showKpiFollowup(kind) {
+  const skipMap = DATA['不跟进名单'] || {};
+  let fu, titleText;
+  if (kind === 'urgent') {
+    fu = (may['会员待跟进']||[]).filter(m => m['紧急续课'] && !(m['会员'] in skipMap));
+    titleText = `🔥 紧急续课会员（剩余≤5节，${fu.length}人）— 已过滤不跟进 ${Object.keys(skipMap).length} 人`;
+  } else {
+    fu = (may['会员待跟进']||[]).filter(m => (m['总剩余']||0)>0 && (m['5月课时']||0)===0 && !(m['会员'] in skipMap));
+    titleText = `⏰ 当月未上课·有剩余课时会员（${fu.length}人）— 已过滤不跟进 ${Object.keys(skipMap).length} 人`;
+  }
+  const sec = document.getElementById('l0-followup-section');
+  const title = document.getElementById('l0-followup-title');
+  const tbody = document.querySelector('#l0-followup-table tbody');
+  if (fu.length===0) {
+    title.innerHTML = `📋 ${titleText} — 暂无 ✨`;
+    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center; color:var(--sub); padding:24px;">无符合条件会员</td></tr>';
+  } else {
+    title.innerHTML = `📋 ${titleText} — 按紧急度排序`;
+    fu.sort((a,b) => {
+      const sa = (a['紧急续课']?100:0)+(a['有课很久没来']?20:0)+(a['需要续课']?10:0)+(a['频率下降']?5:0);
+      const sb = (b['紧急续课']?100:0)+(b['有课很久没来']?20:0)+(b['需要续课']?10:0)+(b['频率下降']?5:0);
+      if (sb!==sa) return sb-sa;
+      return b['距今天数']-a['距今天数'];
+    });
+    tbody.innerHTML = fu.map(m => {
+      const bg = m['紧急续课']?'background:rgba(248,81,73,0.08);':(m['有课很久没来']&&m['距今天数']>=45)?'background:rgba(219,109,40,0.05);':'';
+      let 建议=[];
+      if (m['紧急续课']) 建议.push('立即电话续课');
+      else if (m['需要续课']) 建议.push('本周内续课沟通');
+      if (m['有课很久没来']&&!m['紧急续课']) 建议.push(`微信回访(${m['距今天数']}天)`);
+      if (m['频率下降']) 建议.push(`了解原因(5月${m['5月课时']}节,近3月均${m['近3月均']})`);
+      return `<tr style="${bg}">
+        <td><span style="font-size:11px;">${m['原因']||''}</span><br><span style="font-size:10px;color:var(--sub);">${m['主教练']||''}</span></td>
+        <td><strong>${m['会员']}</strong></td>
+        <td class="num" style="color:${m['总剩余']<=5?'var(--red)':m['总剩余']<20?'var(--yellow)':'var(--text)'}; font-weight:600;">${m['总剩余']}</td>
+        <td class="num" style="color:var(--accent);">${m['课时包剩余']||0}</td>
+        <td class="num" style="color:var(--purple);">${m['储值卡剩余']||0}</td>
+        <td class="num" style="color:${m['距今天数']>=30?'var(--red)':m['距今天数']>=14?'var(--yellow)':'var(--text)'};">${m['距今天数']}</td>
+        <td class="num" style="color:${m['5月课时']===0?'var(--red)':'var(--green)'};">${m['5月课时']}</td>
+        <td class="num">${m['4月课时']}</td>
+        <td class="num">${m['3月课时']}</td>
+        <td class="num" style="color:var(--sub);">${m['近3月均']}</td>
+        <td style="font-size:11px;">${m['最近上课']}</td>
+        <td style="font-size:11px;">${m['最近支付时间']||'-'} ${m['最近支付金额']>0?'¥'+m['最近支付金额'].toLocaleString():''}</td>
+        <td style="font-size:11px; color:var(--accent);">${建议.join(' · ')}</td>
+      </tr>`;
+    }).join('');
+  }
+  sec.style.display = 'block';
+  sec.scrollIntoView({behavior:'smooth', block:'start'});
+}
 
 // === L0 总结 ===
 document.getElementById('l0-summary').innerHTML = `
@@ -1419,20 +1507,34 @@ document.getElementById('l0-summary').innerHTML = `
 `;
 
 // === L0 教练目标进度表 ===
+// 第一行：门店整体（使用「汇总」行）；其余教练按已上课时降序
 const targetTbody = document.querySelector('#l0-target-table tbody');
-(may['5月目标']||[]).filter(t => t['教练']!=='汇总' && t['目标课时']>0).forEach(r => {
+const _汇总 = (may['5月目标']||[]).find(t => t['教练']==='汇总');
+const _coaches = (may['5月目标']||[]).filter(t => t['教练']!=='汇总' && t['目标课时']>0)
+  .sort((a,b) => (b['已上课时']||0) - (a['已上课时']||0));
+const _rows = _汇总 ? [Object.assign({}, _汇总, {_isStore: true}), ..._coaches] : _coaches;
+
+_rows.forEach((r, idx) => {
   const 完成率 = r['完成率'], 预约率 = r['已上+预约完成率'];
   const 缺口 = r['目标课时'] - r['已上课时'] - r['已预约课时'];
   const 落后 = 完成率 < timeProg - 0.05;
   const 危险 = 完成率 < timeProg - 0.15;
   const 状态 = 危险?'🔴严重':落后?'🟡滞后':完成率>=timeProg?'🟢达成':'🟢正常';
   const 颜色 = 危险?'var(--red)':落后?'var(--yellow)':'var(--green)';
+  const isStore = !!r._isStore;
   const tr = document.createElement('tr');
-  tr.style.cursor = 'pointer';
+  if (isStore) {
+    tr.style.background = 'rgba(88,166,255,0.10)';
+    tr.style.borderTop = '2px solid var(--accent)';
+    tr.style.borderBottom = '2px solid var(--accent)';
+    tr.style.cursor = 'default';
+  } else {
+    tr.style.cursor = 'pointer';
+  }
   tr.innerHTML = `
-    <td><strong>${r['教练']}</strong></td>
+    <td><strong style="${isStore?'color:var(--accent);':''}">${isStore?'🏠 门店整体':r['教练']}</strong></td>
     <td class="num">${r['目标课时']}</td>
-    <td class="num" style="color:var(--accent);">${r['已上课时']}</td>
+    <td class="num" style="color:var(--accent); font-weight:${isStore?700:400};">${r['已上课时']}</td>
     <td class="num" style="color:var(--purple);">${r['已预约课时']}</td>
     <td style="min-width:220px;">
       <div style="position:relative; background:var(--panel2); height:18px; border-radius:3px; overflow:hidden;">
@@ -1447,7 +1549,7 @@ const targetTbody = document.querySelector('#l0-target-table tbody');
     <td class="num" style="color:${缺口>40?'var(--red)':缺口>20?'var(--yellow)':'var(--text)'};">${缺口}</td>
     <td><span style="color:${颜色}; font-weight:600;">${状态}</span></td>
   `;
-  tr.addEventListener('click', () => showFollowup(r['教练']));
+  if (!isStore) tr.addEventListener('click', () => showFollowup(r['教练']));
   targetTbody.appendChild(tr);
 });
 
