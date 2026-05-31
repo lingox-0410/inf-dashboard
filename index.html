@@ -1409,6 +1409,51 @@ input, select {
 </div>
 
 
+<!-- ===== TAB L7: 私教收入 (销售报表口径 + 对账) ===== -->
+<div class="tab-content" id="tab-L7">
+  <div style="background:rgba(63,185,80,0.08); border:1px solid var(--green); border-radius:6px; padding:10px 14px; margin-bottom:14px; font-size:12px; color:var(--sub);">
+    💰 <b style="color:var(--text);">私教收入以飞书「销售报表」为准</b>（私教成交后人工登记，每日 API 同步），并与收银流水实际到账自动对账；对不上的列在下方「对账异常」。
+  </div>
+  <div class="kpi-row" id="l7-kpi"></div>
+  <div class="section">
+    <div class="section-header"><h2>🆕 新客 vs 续课</h2><div class="desc">笔数 · 实收 · 客单价 · 占比 · 优惠</div></div>
+    <div class="section-body"><div class="scroll-table"><table id="l7-newrenew-table"><thead><tr>
+      <th>类型</th><th class="num">笔数</th><th class="num">实收</th><th class="num">客单价</th><th class="num">实收占比</th><th class="num">优惠</th>
+    </tr></thead><tbody></tbody></table></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="section">
+      <div class="section-header"><h2>🏃 教练销售拆解</h2><div class="desc">谁卖得多 · 新客/续课结构</div></div>
+      <div class="section-body"><div class="scroll-table" style="max-height:360px;"><table id="l7-coach-table"><thead><tr>
+        <th>教练</th><th class="num">笔数</th><th class="num">实收</th><th class="num">新客</th><th class="num">续课</th>
+      </tr></thead><tbody></tbody></table></div></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><h2>💳 卡类型 / 优惠</h2><div class="desc">销售结构 · 优惠力度</div></div>
+      <div class="section-body">
+        <div id="l7-discount" style="font-size:12px; margin-bottom:10px;"></div>
+        <div class="scroll-table"><table id="l7-card-table"><thead><tr><th>卡类型</th><th class="num">笔数</th><th class="num">实收</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+  </div>
+  <div class="section" id="l7-recon-section">
+    <div class="section-header"><h2>⚠ 对账异常（销售 vs 收银流水）</h2><div class="desc" id="l7-recon-desc"></div></div>
+    <div class="section-body">
+      <div class="findings" id="l7-recon-note" style="margin-bottom:10px;"></div>
+      <div class="scroll-table" style="max-height:360px;"><table id="l7-recon-table"><thead><tr>
+        <th>会员</th><th class="num">销售实收</th><th class="num">流水到账</th><th class="num">差额</th><th>备注</th>
+      </tr></thead><tbody></tbody></table></div>
+      <div id="l7-extra-wrap" style="margin-top:12px;"></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header"><h2>📋 销售明细</h2><div class="desc" id="l7-detail-desc"></div></div>
+    <div class="section-body"><div class="scroll-table" style="max-height:520px;"><table id="l7-detail-table"><thead><tr>
+      <th>日期</th><th>会员</th><th>类型</th><th>卡类型</th><th class="num">实收</th><th class="num">优惠</th><th>主教练</th><th>备注</th>
+    </tr></thead><tbody></tbody></table></div></div>
+  </div>
+</div>
+
 <!-- ===== 附录：全局指标口径 + 计算规则 ===== -->
 <div class="section" style="margin-top:24px; border:2px solid var(--purple);">
   <div class="section-header" style="background:linear-gradient(90deg, rgba(188,140,255,0.15), var(--panel2));">
@@ -1517,51 +1562,6 @@ input, select {
       <li>• <b>体验课记录</b>：2025-04 至 2026-05 共 346 条</li>
       <li>• <b>2025-04 营收 ¥191万 = 开业期一次性大单，不是常态基线</b></li>
     </ul>
-  </div>
-</div>
-
-<!-- ===== TAB L7: 私教收入 (销售报表口径 + 对账) ===== -->
-<div class="tab-content" id="tab-L7">
-  <div style="background:rgba(63,185,80,0.08); border:1px solid var(--green); border-radius:6px; padding:10px 14px; margin-bottom:14px; font-size:12px; color:var(--sub);">
-    💰 <b style="color:var(--text);">私教收入以飞书「销售报表」为准</b>（私教成交后人工登记，每日 API 同步），并与收银流水实际到账自动对账；对不上的列在下方「对账异常」。
-  </div>
-  <div class="kpi-row" id="l7-kpi"></div>
-  <div class="section">
-    <div class="section-header"><h2>🆕 新客 vs 续课</h2><div class="desc">笔数 · 实收 · 客单价 · 占比 · 优惠</div></div>
-    <div class="section-body"><div class="scroll-table"><table id="l7-newrenew-table"><thead><tr>
-      <th>类型</th><th class="num">笔数</th><th class="num">实收</th><th class="num">客单价</th><th class="num">实收占比</th><th class="num">优惠</th>
-    </tr></thead><tbody></tbody></table></div></div>
-  </div>
-  <div class="grid-2">
-    <div class="section">
-      <div class="section-header"><h2>🏃 教练销售拆解</h2><div class="desc">谁卖得多 · 新客/续课结构</div></div>
-      <div class="section-body"><div class="scroll-table" style="max-height:360px;"><table id="l7-coach-table"><thead><tr>
-        <th>教练</th><th class="num">笔数</th><th class="num">实收</th><th class="num">新客</th><th class="num">续课</th>
-      </tr></thead><tbody></tbody></table></div></div>
-    </div>
-    <div class="section">
-      <div class="section-header"><h2>💳 卡类型 / 优惠</h2><div class="desc">销售结构 · 优惠力度</div></div>
-      <div class="section-body">
-        <div id="l7-discount" style="font-size:12px; margin-bottom:10px;"></div>
-        <div class="scroll-table"><table id="l7-card-table"><thead><tr><th>卡类型</th><th class="num">笔数</th><th class="num">实收</th></tr></thead><tbody></tbody></table></div>
-      </div>
-    </div>
-  </div>
-  <div class="section" id="l7-recon-section">
-    <div class="section-header"><h2>⚠ 对账异常（销售 vs 收银流水）</h2><div class="desc" id="l7-recon-desc"></div></div>
-    <div class="section-body">
-      <div class="findings" id="l7-recon-note" style="margin-bottom:10px;"></div>
-      <div class="scroll-table" style="max-height:360px;"><table id="l7-recon-table"><thead><tr>
-        <th>会员</th><th class="num">销售实收</th><th class="num">流水到账</th><th class="num">差额</th><th>备注</th>
-      </tr></thead><tbody></tbody></table></div>
-      <div id="l7-extra-wrap" style="margin-top:12px;"></div>
-    </div>
-  </div>
-  <div class="section">
-    <div class="section-header"><h2>📋 销售明细</h2><div class="desc" id="l7-detail-desc"></div></div>
-    <div class="section-body"><div class="scroll-table" style="max-height:520px;"><table id="l7-detail-table"><thead><tr>
-      <th>日期</th><th>会员</th><th>类型</th><th>卡类型</th><th class="num">实收</th><th class="num">优惠</th><th>主教练</th><th>备注</th>
-    </tr></thead><tbody></tbody></table></div></div>
   </div>
 </div>
 
