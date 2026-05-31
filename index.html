@@ -199,6 +199,7 @@ tr:hover { background: var(--panel2); }
 
 /* Chips */
 .chip-group { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.month-select { background: var(--panel2); color: var(--text); border: 1px solid var(--accent); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600; max-width: 220px; cursor: pointer; -webkit-appearance: menulist; appearance: menulist; }
 .chip {
   display: inline-block; padding: 4px 10px;
   background: var(--panel); border: 1px solid var(--line);
@@ -779,8 +780,7 @@ input, select {
     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
       <span style="font-size:13px; font-weight:600; color:var(--accent);">📅 全局时间筛选</span>
       <span style="font-size:11px; color:var(--sub);">影响教练/课程/会员的当月切片（默认当月）：</span>
-      <div class="chip-group" id="l2-global-month-chips" style="flex:1;"></div>
-      <button id="l2-global-cumulative" style="background:transparent; border:1px solid var(--purple); color:var(--purple); padding:4px 12px; font-size:11px;">📊 累计全量</button>
+      <select id="l2-global-month-select" class="month-select" style="flex:1 1 auto; min-width:130px;"></select>
     </div>
   </div>
 
@@ -1278,8 +1278,7 @@ input, select {
     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
       <span style="font-size:13px; font-weight:600; color:var(--accent);">📅 全局时间筛选</span>
       <span style="font-size:11px; color:var(--sub);">影响下方所有模块（默认当月）：</span>
-      <div class="chip-group" id="l6-global-month-chips" style="flex:1;"></div>
-      <button id="l6-global-cumulative" style="background:transparent; border:1px solid var(--purple); color:var(--purple); padding:4px 12px; font-size:11px;">📊 累计全量</button>
+      <select id="l6-global-month-select" class="month-select" style="flex:1 1 auto; min-width:130px;"></select>
     </div>
   </div>
 
@@ -2298,29 +2297,13 @@ function renderL2All() {
   document.querySelectorAll('.l2-section-month').forEach(el => el.textContent = label);
 }
 
-const l2GmEl = document.getElementById('l2-global-month-chips');
-(l2Data['可选月份']||[]).slice().reverse().forEach(m => {
-  const span = document.createElement('span');
-  span.className = 'chip' + (m===l2Data['当月']?' active':'');
-  span.dataset.val = m;
-  span.textContent = m + (m===l2Data['当月']?' (当月)':m===l2Data['上月']?' (上月)':'');
-  l2GmEl.appendChild(span);
-});
-l2GmEl.querySelectorAll('.chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    l2GmEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    const btn = document.getElementById('l2-global-cumulative');
-    btn.style.background='transparent'; btn.style.color='var(--purple)';
-    chip.classList.add('active');
-    l2GlobalMonth = chip.dataset.val;
-    renderL2All();
-  });
-});
-document.getElementById('l2-global-cumulative').addEventListener('click', (e) => {
-  l2GmEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  e.currentTarget.style.background='var(--purple)';
-  e.currentTarget.style.color='#fff';
-  l2GlobalMonth = null;
+const l2GmEl = document.getElementById('l2-global-month-select');
+{
+  const _ms = (l2Data['可选月份']||[]).slice().reverse();
+  l2GmEl.innerHTML = _ms.map(m => `<option value="${m}"${m===l2Data['当月']?' selected':''}>${m}${m===l2Data['当月']?' · 当月':m===l2Data['上月']?' · 上月':''}</option>`).join('') + '<option value="__cumul__">📊 累计全量</option>';
+}
+l2GmEl.addEventListener('change', () => {
+  l2GlobalMonth = (l2GmEl.value === '__cumul__') ? null : l2GmEl.value;
   renderL2All();
 });
 
@@ -2635,7 +2618,7 @@ function l4ShowDetail(title, color, predicate) {
       <td class="num">${r['累计课时']||0}</td>
       <td class="num">${r['月均次数']||0}</td>
       <td class="num">${r['距今天数']??''}</td>
-      <td class="num">${r['总剩余']||0}</td>
+      <td class="num">${Math.round(r['总剩余']||0)}</td>
       <td style="text-align:center;">${r['有效会员']?'✅':'—'}</td>
       <td class="num">${r['流失预警分']||0}</td>
       <td>${r['流失等级']||''}</td>
@@ -2758,7 +2741,7 @@ function renderL5() {
     <td class="num">${m['累计课时']}</td>
     <td class="num">${m['月均次数']}</td>
     <td class="num" style="color:${(m['距今天数']||0)>=60?'var(--red)':(m['距今天数']||0)>=30?'var(--yellow)':'var(--text)'};">${m['距今天数']}</td>
-    <td class="num" style="color:${m['总剩余']<=5?'var(--red)':m['总剩余']<20?'var(--yellow)':'var(--text)'}; font-weight:600;">${m['总剩余']}</td>
+    <td class="num" style="color:${m['总剩余']<=5?'var(--red)':m['总剩余']<20?'var(--yellow)':'var(--text)'}; font-weight:600;">${Math.round(m['总剩余']||0)}</td>
     <td style="text-align:center;">${m['有效会员']?'<span style="color:var(--green); font-weight:700;">✅</span>':'<span style="color:var(--sub);">—</span>'}</td>
     <td class="num" style="color:${m['流失预警分']>=80?'var(--red)':m['流失预警分']>=60?'var(--yellow)':'var(--text)'}; font-weight:600;">${m['流失预警分']}</td>
     <td><span class="tag ${tagClass[m['流失等级']]||'tag-sleep'}">${m['流失等级']}</span></td>
@@ -3039,30 +3022,13 @@ function renderL6Breakdown() {
 }
 
 // ====== 全局月份 chip ======
-const gmEl = document.getElementById('l6-global-month-chips');
-(tk['可选月份']||[]).slice().reverse().forEach(m => {
-  const span = document.createElement('span');
-  span.className = 'chip' + (m===tkCurMonth?' active':'');
-  span.dataset.val = m;
-  span.textContent = m + (m===tkCurMonth?' (当月)':m===tkLastMonth?' (上月)':'');
-  gmEl.appendChild(span);
-});
-gmEl.querySelectorAll('.chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    gmEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    const btn = document.getElementById('l6-global-cumulative');
-    btn.style.background = 'transparent';
-    btn.style.color = 'var(--purple)';
-    chip.classList.add('active');
-    l6GlobalMonth = chip.dataset.val;
-    renderL6Breakdown();
-  });
-});
-document.getElementById('l6-global-cumulative').addEventListener('click', (e) => {
-  gmEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  e.currentTarget.style.background = 'var(--purple)';
-  e.currentTarget.style.color = '#fff';
-  l6GlobalMonth = null;
+const gmEl = document.getElementById('l6-global-month-select');
+{
+  const _ms = (tk['可选月份']||[]).slice().reverse();
+  gmEl.innerHTML = _ms.map(m => `<option value="${m}"${m===tkCurMonth?' selected':''}>${m}${m===tkCurMonth?' · 当月':m===tkLastMonth?' · 上月':''}</option>`).join('') + '<option value="__cumul__">📊 累计全量</option>';
+}
+gmEl.addEventListener('change', () => {
+  l6GlobalMonth = (gmEl.value === '__cumul__') ? null : gmEl.value;
   renderL6Breakdown();
 });
 
