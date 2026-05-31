@@ -621,13 +621,11 @@ input, select {
             <th>会员</th>
             <th>原因</th>
             <th class="num">总剩余</th>
-            <th class="num">课时包</th>
-            <th class="num">储值</th>
-            <th class="num">距今</th>
+            <th class="num">近3月均</th>
             <th class="num" id="th-fu-cur">当月</th>
             <th class="num" id="th-fu-prev">上月</th>
             <th class="num" id="th-fu-prev2">前月</th>
-            <th class="num">近3月均</th>
+            <th class="num">距今</th>
             <th>最近上课</th>
             <th>最近支付</th>
             <th>建议</th>
@@ -1634,7 +1632,7 @@ function showKpiFollowup(kind) {
   const tbody = document.querySelector('#l0-followup-table tbody');
   if (fu.length===0) {
     title.innerHTML = `📋 ${titleText} — 暂无 ✨`;
-    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center; color:var(--sub); padding:24px;">无符合条件会员</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:var(--sub); padding:24px;">无符合条件会员</td></tr>';
   } else {
     title.innerHTML = `📋 ${titleText} — 按紧急度排序`;
     fu.sort((a,b) => {
@@ -1653,14 +1651,12 @@ function showKpiFollowup(kind) {
       return `<tr style="${bg}">
         <td><strong>${m['会员']}</strong></td>
         <td><span style="font-size:11px;">${m['原因']||''}</span><br><span style="font-size:10px;color:var(--sub);">${m['主教练']||''}</span></td>
-        <td class="num" style="color:${m['总剩余']<=5?'var(--red)':m['总剩余']<20?'var(--yellow)':'var(--text)'}; font-weight:600;">${m['总剩余']}</td>
-        <td class="num" style="color:var(--accent);">${m['课时包剩余']||0}</td>
-        <td class="num" style="color:var(--purple);">${m['储值卡剩余']||0}</td>
-        <td class="num" style="color:${m['距今天数']>=30?'var(--red)':m['距今天数']>=14?'var(--yellow)':'var(--text)'};">${m['距今天数']}</td>
+        <td class="num" style="color:${m['总剩余']<=5?'var(--red)':m['总剩余']<20?'var(--yellow)':'var(--text)'}; font-weight:600;">${Math.round(m['总剩余']||0)}</td>
+        <td class="num" style="color:var(--sub);">${m['近3月均']}</td>
         <td class="num" style="color:${m['当月课时']===0?'var(--red)':'var(--green)'};">${m['当月课时']}</td>
         <td class="num">${m['上月课时']}</td>
         <td class="num">${m['前月课时']}</td>
-        <td class="num" style="color:var(--sub);">${m['近3月均']}</td>
+        <td class="num" style="color:${m['距今天数']>=30?'var(--red)':m['距今天数']>=14?'var(--yellow)':'var(--text)'};">${m['距今天数']}</td>
         <td style="font-size:11px;">${m['最近上课']}</td>
         <td style="font-size:11px;">${m['最近支付时间']||'-'} ${m['最近支付金额']>0?'¥'+m['最近支付金额'].toLocaleString():''}</td>
         <td style="font-size:11px; color:var(--accent);">${建议.join(' · ')}</td>
@@ -1775,7 +1771,7 @@ function showFollowup(coachName) {
   const tbody = document.querySelector('#l0-followup-table tbody');
   if (fu.length===0) {
     title.innerHTML = `📋 ${coachName} · 本月暂无待跟进会员 ✨`;
-    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center; color:var(--sub); padding:24px;">该教练的所有会员都状态稳定</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:var(--sub); padding:24px;">该教练的所有会员都状态稳定</td></tr>';
   } else {
     title.innerHTML = `📋 ${coachName} · 待跟进会员（${fu.length}人）— 按紧急度排序`;
     fu.sort((a,b) => {
@@ -1794,14 +1790,12 @@ function showFollowup(coachName) {
       return `<tr style="${bg}">
         <td><strong>${m['会员']}</strong></td>
         <td><span style="font-size:11px;">${m['原因']||''}</span></td>
-        <td class="num" style="color:${m['总剩余']<=5?'var(--red)':m['总剩余']<20?'var(--yellow)':'var(--text)'}; font-weight:600;">${m['总剩余']}</td>
-        <td class="num" style="color:var(--accent);">${m['课时包剩余']||0}</td>
-        <td class="num" style="color:var(--purple);">${m['储值卡剩余']||0}</td>
-        <td class="num" style="color:${m['距今天数']>=30?'var(--red)':m['距今天数']>=14?'var(--yellow)':'var(--text)'};">${m['距今天数']}</td>
+        <td class="num" style="color:${m['总剩余']<=5?'var(--red)':m['总剩余']<20?'var(--yellow)':'var(--text)'}; font-weight:600;">${Math.round(m['总剩余']||0)}</td>
+        <td class="num" style="color:var(--sub);">${m['近3月均']}</td>
         <td class="num" style="color:${m['当月课时']===0?'var(--red)':'var(--green)'};">${m['当月课时']}</td>
         <td class="num">${m['上月课时']}</td>
         <td class="num">${m['前月课时']}</td>
-        <td class="num" style="color:var(--sub);">${m['近3月均']}</td>
+        <td class="num" style="color:${m['距今天数']>=30?'var(--red)':m['距今天数']>=14?'var(--yellow)':'var(--text)'};">${m['距今天数']}</td>
         <td style="font-size:11px;">${m['最近上课']}</td>
         <td style="font-size:11px;">${m['最近支付时间']||'-'} ${m['最近支付金额']>0?'¥'+m['最近支付金额'].toLocaleString():''}</td>
         <td style="font-size:11px; color:var(--accent);">${建议.join(' · ')}</td>
