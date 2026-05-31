@@ -424,6 +424,46 @@ input, select {
   table { font-size: 10px; }
   th, td { padding: 4px 5px; }
 }
+
+/* ===== 2026-05-31 手机端明细表优化：单行不换行 + 表头行冻结 + 最左列冻结 ===== */
+@media (max-width: 768px) {
+  /* 两类滚动容器：.scroll-table(带 max-height,双向滚) 与 内联 overflow-x:auto 包裹 div(横向滚) */
+  .scroll-table { overflow: auto !important; -webkit-overflow-scrolling: touch; }
+  [style*="overflow-x:auto"] { -webkit-overflow-scrolling: touch; }
+
+  /* 单元格压成一行，按内容宽度展开（横向可滚，不再为塞进屏幕而换行/堆字） */
+  .scroll-table table th, .scroll-table table td,
+  [style*="overflow-x:auto"] > table th, [style*="overflow-x:auto"] > table td {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    vertical-align: middle;
+  }
+  .scroll-table > table,
+  [style*="overflow-x:auto"] > table { width: max-content; min-width: 100%; }
+
+  /* 表头字段名行冻结（纵向滚动常驻） */
+  .scroll-table thead th,
+  [style*="overflow-x:auto"] > table thead th {
+    position: -webkit-sticky; position: sticky; top: 0; z-index: 2;
+    background: var(--panel2);
+    box-shadow: inset 0 -1px 0 var(--line);
+  }
+  /* 最左列（教练/会员名）冻结（横向滚动常驻） */
+  .scroll-table tbody td:first-child,
+  [style*="overflow-x:auto"] > table tbody td:first-child {
+    position: -webkit-sticky; position: sticky; left: 0; z-index: 1;
+    background: var(--panel);
+    box-shadow: inset -1px 0 0 var(--line);
+  }
+  /* 左上角交叉单元格压最高层 */
+  .scroll-table thead th:first-child,
+  [style*="overflow-x:auto"] > table thead th:first-child {
+    position: -webkit-sticky; position: sticky; left: 0; top: 0; z-index: 3;
+    background: var(--panel2);
+    box-shadow: inset -1px 0 0 var(--line), inset 0 -1px 0 var(--line);
+  }
+}
+
 </style>
 </head>
 <body>
@@ -578,8 +618,8 @@ input, select {
       <div class="scroll-table">
         <table id="l0-followup-table">
           <thead><tr>
-            <th>原因</th>
             <th>会员</th>
+            <th>原因</th>
             <th class="num">总剩余</th>
             <th class="num">课时包</th>
             <th class="num">储值</th>
@@ -1611,8 +1651,8 @@ function showKpiFollowup(kind) {
       if (m['有课很久没来']&&!m['紧急续课']) 建议.push(`微信回访(${m['距今天数']}天)`);
       if (m['频率下降']) 建议.push(`了解原因(${CURL}${m['当月课时']}节,近3月均${m['近3月均']})`);
       return `<tr style="${bg}">
-        <td><span style="font-size:11px;">${m['原因']||''}</span><br><span style="font-size:10px;color:var(--sub);">${m['主教练']||''}</span></td>
         <td><strong>${m['会员']}</strong></td>
+        <td><span style="font-size:11px;">${m['原因']||''}</span><br><span style="font-size:10px;color:var(--sub);">${m['主教练']||''}</span></td>
         <td class="num" style="color:${m['总剩余']<=5?'var(--red)':m['总剩余']<20?'var(--yellow)':'var(--text)'}; font-weight:600;">${m['总剩余']}</td>
         <td class="num" style="color:var(--accent);">${m['课时包剩余']||0}</td>
         <td class="num" style="color:var(--purple);">${m['储值卡剩余']||0}</td>
@@ -1752,8 +1792,8 @@ function showFollowup(coachName) {
       if (m['有课很久没来']&&!m['紧急续课']) 建议.push(`微信回访(${m['距今天数']}天)`);
       if (m['频率下降']) 建议.push(`了解原因(${CURL}${m['当月课时']}节,近3月均${m['近3月均']})`);
       return `<tr style="${bg}">
-        <td><span style="font-size:11px;">${m['原因']||''}</span></td>
         <td><strong>${m['会员']}</strong></td>
+        <td><span style="font-size:11px;">${m['原因']||''}</span></td>
         <td class="num" style="color:${m['总剩余']<=5?'var(--red)':m['总剩余']<20?'var(--yellow)':'var(--text)'}; font-weight:600;">${m['总剩余']}</td>
         <td class="num" style="color:var(--accent);">${m['课时包剩余']||0}</td>
         <td class="num" style="color:var(--purple);">${m['储值卡剩余']||0}</td>
